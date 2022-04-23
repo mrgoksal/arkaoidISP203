@@ -138,7 +138,7 @@ class Game:
         rules_background = pygame.image.load("images/rules_background.jpg")
         rules_background = pygame.transform.scale(rules_background, (WIDTH, HEIGHT))
 
-        rules = pygame.image.load("images/био-яки.png")
+        rules = pygame.image.load("images/rules.png")
         rules = pygame.transform.scale(rules, (WIDTH, HEIGHT))
 
         buttons = [
