@@ -1,5 +1,5 @@
 import pygame
-
+# Импорт ресуров
 from configs import *
 from src.ball import Ball
 from src.paddle import Paddle
@@ -8,6 +8,7 @@ from src.blocks import Blocks
 
 
 class Game:
+    # Инициализация окна и игровых элементов
     def __init__(self):
         self.img = None
         self.clock = None
@@ -16,39 +17,43 @@ class Game:
         self.width = WIDTH
         self.height = HEIGHT
 
-        # Menu
+        # Меню
         self.is_menu = True
 
-        # Ball
+        # Мяч
         self.ball = Ball()
 
-        # Paddle
+        # Отбивная "доска"
         self.paddle = Paddle()
 
-        # Blocks
+        # Блоки
         self.blocks = Blocks()
 
+    #  Первичный запуск + программный цикл
     def run(self):
-        pygame.init()
+        pygame.init()  # Инициализация pygame
+        # Настройка разрешения окна
         self.sc = pygame.display.set_mode((self.width, self.height))
         self.clock = pygame.time.Clock()
 
-        # background image
+        # Фоновое изображение (подгрузка + скейл)
         self.img = pygame.image.load('images/background.jpg').convert()
         self.img = pygame.transform.scale(self.img, (WIDTH, HEIGHT))
 
-        # game running
+        # Программный цикл
         while True:
             if not self.show_menu():
                 return
             self.game_loop()
 
+    # Обнуление программных констант (возвращение в меню + пересоздание элементов)
     def restart(self):
         self.is_menu = True
         self.ball = Ball()
         self.paddle = Paddle()
         self.blocks = Blocks()
 
+    # Обнаружение коллизии путем сравнения координат + нормализация положения мяча
     def detect_collision(self):
         if self.ball.dx > 0:
             delta_x = self.ball.rect.right - self.paddle.rect.left
@@ -67,6 +72,7 @@ class Game:
             self.ball.dx = -self.ball.dx
         return self.ball.dx, self.ball.dy
 
+    # Функция заупска игрового цикла
     def game_loop(self):
         while not self.is_menu:
             for event in pygame.event.get():
@@ -74,43 +80,45 @@ class Game:
                     exit()
             self.sc.blit(self.img, (0, 0))
 
-            # drawing world
+            # Отрисовка блоков
             [pygame.draw.rect(self.sc, self.blocks.color_list[color], block) for color, block in
              enumerate(self.blocks.block_list)]
 
+            # Отрисовка "отбивочной доски"
             pygame.draw.rect(self.sc, pygame.Color('darkorange'), self.paddle)
 
+            # Отрисовка мяча
             pygame.draw.circle(self.sc, pygame.Color('white'), self.ball.rect.center, self.ball.radius)
 
-            # ball movement
+            # Расчет смещения мяча скорость*метровое смещение
             self.ball.rect.x += self.ball.speed * self.ball.dx
             self.ball.rect.y += self.ball.speed * self.ball.dy
 
-            # collision left right
+            # Нормализация положения мяча при касании оным одного из краев (левого или правого) (угол вхождения = углу выхождения)
             if self.ball.rect.centerx < self.ball.radius or self.ball.rect.centerx > WIDTH - self.ball.radius:
                 self.ball.dx = -self.ball.dx
 
-            # collision top
+            # Нормализация положения мяча при касании оным верхнего края экрана
             if self.ball.rect.centery < self.ball.radius:
                 self.ball.dy = -self.ball.dy
 
-            # collision paddle
+            # Расчет положения мяча при касании оным "отбивочной" доски
             if self.ball.rect.colliderect(self.paddle) and self.ball.dy > 0:
                 self.ball.dx, self.ball.dy = self.detect_collision()
 
-            # collision blocks
+            # Расчет положения мяча при касании оного с блоком с удалением последнего
             hit_index = self.ball.rect.collidelist(self.blocks.block_list)
             if hit_index != -1:
                 hit_rect = self.blocks.block_list.pop(hit_index)
                 hit_color = self.blocks.color_list.pop(hit_index)
                 self.ball.dx, self.ball.dy = self.detect_collision()
 
-                # special effect
+                # Специальный эффект при уничтожении блока
                 hit_rect.inflate_ip(self.ball.rect.width * 3, self.ball.rect.height * 3)
                 pygame.draw.rect(self.sc, hit_color, hit_rect)
                 self.fps += 2
 
-            # win, game over
+            # Конец игры. Условие поражения (положение мяча < высоты экрана) и  условие победы (список блоков пуст)
             if self.ball.rect.bottom > HEIGHT:
                 print('GAME OVER!')
                 self.restart()
@@ -132,7 +140,8 @@ class Game:
             self.clock.tick(self.fps)
 
     def show_menu(self):
-        menu_background = pygame.image.load("images/back.jpg")
+        # Подгрузка и скейл фоновых изображений для различных экранных форм
+        menu_background = pygame.image.load("images/menu_background.jpg")
         menu_background = pygame.transform.scale(menu_background, (WIDTH, HEIGHT))
 
         rules_background = pygame.image.load("images/rules_background.jpg")
@@ -141,40 +150,48 @@ class Game:
         rules = pygame.image.load("images/rules.png")
         rules = pygame.transform.scale(rules, (WIDTH, HEIGHT))
 
+        # Инициализация кнопок (oX, oY, текст внутри, ширина кликабельной области, высота кликабельной области, цвет выделения)
         buttons = [
-            Button(890 * SCALE, 377 * SCALE, "Новая игра", 300, 100, (110, 110, 110)),
-            Button(915 * SCALE, 477 * SCALE, "Правила", 300, 100, (110, 110, 110)),
-            Button(920 * SCALE, 577 * SCALE, "Выход", 300, 100, (110, 110, 110))
+            Button(890 * SCALE, 119 * SCALE, "Новая игра", 300, 100, (110, 110, 110)),
+            Button(884 * SCALE, 277 * SCALE, "Правила", 300, 100, (110, 110, 110)),
+            Button(920 * SCALE, 450 * SCALE, "Выход", 300, 100, (110, 110, 110))
         ]
 
+        # Цикл меню
         while self.is_menu:
+            # Считывание взаимодействий пользователя с программой (за тик)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
-
+            # Отрисовка фона
             self.sc.blit(menu_background, (0, 0))
-
+            # Добавление "эффекта" от наведения+нажатия на кнопку
             for ind, button in enumerate(buttons):
                 if button.draw(self.sc):
+                    # Новая игра
                     if ind == 0:
-                        self.is_menu = False
+                        self.is_menu = False  # Прекращение цикла меню
                         return True
                     if ind == 1:
+                        # Запуск экрана правил
+                        # Считывание взаимодействий пользователя с программой
                         while not pygame.key.get_pressed()[pygame.K_ESCAPE]:
                             for event in pygame.event.get():
                                 if event.type == pygame.QUIT:
                                     exit()
 
+                            # Отрисовка фона и текста правил
                             self.sc.blit(rules_background, (0, 0))
                             self.sc.blit(rules, (0, 0))
-
+                            # Обнвление дисплея (переход на следующий тик) + установка тикрейта
                             pygame.display.flip()
                             self.clock.tick(self.fps)
                     if ind == 2:
+                        # Выход из программы (прекращение программного цикла)
                         self.is_menu = False
                         return False
 
-            # update screen
+            # Обновление дисплея (переход на следующий тик) + установка тикрейта
             pygame.display.flip()
             self.clock.tick(self.fps)
 
