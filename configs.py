@@ -17,9 +17,9 @@ BALL_RADIUS = 20  # Радиус
 BALL_SPEED = 6  # Скорость полета
 
 # Настройки  блоков
-BLOCKS_WIDTH = 192  # Ширина
+BLOCKS_WIDTH = 190  # Ширина
 BLOCKS_HEIGHT = 50  # Высота
-BLOCKS_DIST = 20  # Интервал между блоками
+BLOCKS_DIST = 10  # Интервал между блоками
 BLOCKS_LENGTH = BLOCKS_WIDTH + BLOCKS_DIST  # Расчет длины одного блока
 BLOCKS_COUNT = WIDTH // BLOCKS_LENGTH  # Расчет количества блоков на экране
 
