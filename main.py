@@ -51,6 +51,7 @@ class Game:
         self.ball = Ball()
         self.paddle = Paddle()
         self.blocks = Blocks()
+        self.fps = FPS #Обнуление фпс при новой игре
 
     # Обнаружение коллизии путем сравнения координат + нормализация положения мяча
     def detect_collision(self):
@@ -63,11 +64,11 @@ class Game:
         else:
             delta_y = self.paddle.rect.bottom - self.ball.rect.top
 
-        if abs(delta_x - delta_y) < 10:
+        if delta_x == delta_y:
             self.ball.dx, self.ball.dy = -self.ball.dx, -self.ball.dy
-        elif delta_x > delta_y:
+        elif delta_x > delta_y and self.ball.rect.top > self.ball.radius:
             self.ball.dy = -self.ball.dy
-        elif delta_y > delta_x:
+        elif delta_y > delta_x and self.ball.rect.left > self.ball.radius and self.ball.rect.right < WIDTH - self.ball.radius:
             self.ball.dx = -self.ball.dx
         return self.ball.dx, self.ball.dy
 
@@ -102,8 +103,8 @@ class Game:
                 self.ball.dy = -self.ball.dy
 
             # Расчет положения мяча при касании оным "отбивочной" доски
-            if self.ball.rect.colliderect(self.paddle) and self.ball.dy > 0:
-                self.ball.dx, self.ball.dy = self.detect_collision()
+            if self.ball.rect.colliderect(self.paddle.rect) and self.ball.dy > 0:
+                self.ball.dy = -self.ball.dy
 
             # Расчет положения мяча при касании оного с блоком с удалением последнего
             hit_index = self.ball.rect.collidelist(self.blocks.block_list)
